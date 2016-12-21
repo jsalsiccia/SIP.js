@@ -28,6 +28,10 @@ function getSupportedHeader (request) {
   if (request.ua.configuration.replaces === SIP.C.supported.SUPPORTED) {
     optionTags.push('replaces');
   }
+  if (request.ua.configuration.sessionTimers === SIP.C.supported.SUPPORTED ||
+      request.ua.configuration.sessionTimers === SIP.C.supported.REQUIRED) {
+    optionTags.push('timer');
+  }
 
   optionTags.push('outbound');
 

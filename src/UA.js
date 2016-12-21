@@ -31,7 +31,8 @@ var UA,
       'OPTIONS',
       'INFO',
       'NOTIFY',
-      'REFER'
+      'REFER',
+      'UPDATE'
     ],
 
     ACCEPTED_BODY_TYPES: [
@@ -946,7 +947,8 @@ UA.prototype.loadConfig = function(configuration) {
         return new SIP.DigestAuthentication(ua);
       }),
 
-      allowLegacyNotifications: false
+      allowLegacyNotifications: false,
+      sessionTimers: SIP.C.supported.UNSUPPORTED
     };
 
   // Pre-Configuration
@@ -1186,6 +1188,7 @@ UA.configuration_skeleton = (function() {
       "mediaConstraints",
       "authenticationFactory",
       "allowLegacyNotifications",
+      "sessionTimers",
 
       // Post-configuration generated parameters
       "via_core_value",
@@ -1642,6 +1645,16 @@ UA.configuration_check = {
     allowLegacyNotifications: function(allowLegacyNotifications) {
       if (typeof allowLegacyNotifications === 'boolean') {
         return allowLegacyNotifications;
+      }
+    },
+
+    sessionTimers: function(sessionTimers) {
+      if(sessionTimers === SIP.C.supported.REQUIRED) {
+        return SIP.C.supported.REQUIRED;
+      } else if (sessionTimers === SIP.C.supported.SUPPORTED) {
+        return SIP.C.supported.SUPPORTED;
+      } else  {
+        return SIP.C.supported.UNSUPPORTED;
       }
     }
   }

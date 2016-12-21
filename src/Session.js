@@ -1704,6 +1704,9 @@ InviteClientContext = function(ua, target, options) {
   if (ua.configuration.replaces === SIP.C.supported.REQUIRED) {
     extraHeaders.push('Require: replaces');
   }
+  if (ua.configuration.sessionTimers === SIP.C.supported.REQUIRED) {
+    extraHeaders.push('Require: timer');
+  }
 
   options.extraHeaders = extraHeaders;
 
