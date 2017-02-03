@@ -1708,6 +1708,11 @@ InviteClientContext = function(ua, target, options) {
     extraHeaders.push('Require: timer');
   }
 
+  if ([SIP.C.supported.SUPPORTED, SIP.C.supported.REQUIRED].indexOf(ua.configuration.sessionTimers) > -1 &&
+      [SIP.UA.C.REFRESHER_UAC, SIP.UA.C.REFRESHER_UAS].indexOf(ua.configuration.sessionTimerUACRefresher) > -1) {
+    extraHeaders.push('Session-Expires: ' + SIP.UA.C.SESSION_EXPIRES_DEFAULT + ';refresher=' + ua.configuration.sessionTimerUACRefresher);
+  }
+
   options.extraHeaders = extraHeaders;
 
   SIP.Utils.augment(this, SIP.ClientContext, [ua, SIP.C.INVITE, target, options]);

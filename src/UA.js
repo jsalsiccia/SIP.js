@@ -41,7 +41,17 @@ var UA,
     ],
 
     MAX_FORWARDS: 70,
-    TAG_LENGTH: 10
+    TAG_LENGTH: 10,
+
+    // configuration option values to specify a choice of session timer refresher
+    REFRESHER_UAC: 'uac',
+    REFRESHER_UAS: 'uas',
+    REFRESHER_OMIT: 'omit',
+
+    // https://tools.ietf.org/html/rfc4028#section-4
+    SESSION_EXPIRES_DEFAULT: 1800, // recommended
+    SESSION_EXPIRES_MIN: 90 // must
+
   };
 
 UA = function(configuration) {
@@ -948,7 +958,9 @@ UA.prototype.loadConfig = function(configuration) {
       }),
 
       allowLegacyNotifications: false,
-      sessionTimers: SIP.C.supported.UNSUPPORTED
+      sessionTimers: SIP.C.supported.UNSUPPORTED,
+      sessionTimerUACRefresher: C.REFRESHER_OMIT,
+      sessionTimerUASRefresher: C.REFRESHER_OMIT
     };
 
   // Pre-Configuration
@@ -1189,6 +1201,8 @@ UA.configuration_skeleton = (function() {
       "authenticationFactory",
       "allowLegacyNotifications",
       "sessionTimers",
+      "sessionTimerUACRefresher", // UAC's choice of refresher
+      "sessionTimerUASRefresher", // UAS's choice of refresher
 
       // Post-configuration generated parameters
       "via_core_value",
@@ -1655,6 +1669,26 @@ UA.configuration_check = {
         return SIP.C.supported.SUPPORTED;
       } else  {
         return SIP.C.supported.UNSUPPORTED;
+      }
+    },
+
+    sessionTimerUACRefresher: function(refresher) {
+      if (refresher === C.REFRESHER_UAC) {
+        return C.REFRESHER_UAC;
+      } else if (refresher === C.REFRESHER_UAS) {
+        return C.REFRESHER_UAS;
+      } else {
+        return C.REFRESHER_OMIT;
+      }
+    },
+
+    sessionTimerUASRefresher: function(refresher) {
+      if (refresher === C.REFRESHER_UAC) {
+        return C.REFRESHER_UAC;
+      } else if (refresher === C.REFRESHER_UAS) {
+        return C.REFRESHER_UAS;
+      } else {
+        return C.REFRESHER_OMIT;
       }
     }
   }
