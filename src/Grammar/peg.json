@@ -32,6 +32,7 @@
      "turn_URI",
      "uuid",
      "WWW_Authenticate",
-     "challenge"
+     "challenge",
+     "Allow"
   ]
 }
