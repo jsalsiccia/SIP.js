@@ -48,10 +48,10 @@ var UA,
     REFRESHER_UAS: 'uas',
     REFRESHER_OMIT: 'omit',
 
-    // https://tools.ietf.org/html/rfc4028#section-4
-    SESSION_EXPIRES_DEFAULT: 1800, // recommended
-    SESSION_EXPIRES_MIN: 90 // must
-
+    // recommended: https://tools.ietf.org/html/rfc4028#section-4
+    SESSION_EXPIRES_DEFAULT: 1800,
+    // required: https://tools.ietf.org/html/rfc4028#section-5
+    SESSION_EXPIRES_MIN: 90
   };
 
 UA = function(configuration) {
@@ -958,9 +958,13 @@ UA.prototype.loadConfig = function(configuration) {
       }),
 
       allowLegacyNotifications: false,
-      sessionTimers: SIP.C.supported.UNSUPPORTED,
-      sessionTimerUACRefresher: C.REFRESHER_OMIT,
-      sessionTimerUASRefresher: C.REFRESHER_OMIT
+
+      sessionTimer: SIP.C.supported.UNSUPPORTED,
+      sessionTimerInitialRequest: false,
+      sessionTimerInterval: C.SESSION_EXPIRES_DEFAULT,
+      sessionTimerMinSe: C.SESSION_EXPIRES_MIN,
+      sessionTimerUacRefresherChoice: C.REFRESHER_OMIT,
+      sessiomTimerUasRefresherChoice: C.REFRESHER_UAS
     };
 
   // Pre-Configuration
@@ -1200,9 +1204,12 @@ UA.configuration_skeleton = (function() {
       "mediaConstraints",
       "authenticationFactory",
       "allowLegacyNotifications",
-      "sessionTimers",
-      "sessionTimerUACRefresher", // UAC's choice of refresher
-      "sessionTimerUASRefresher", // UAS's choice of refresher
+      "sessionTimer",
+      "sessionTimerInitialRequest",
+      "sessionTimerInterval",
+      "sessionTimerMinSe",
+      "sessionTimerUacRefresherChoice",
+      "sessionTimerUasRefresherChoice",
 
       // Post-configuration generated parameters
       "via_core_value",
@@ -1662,33 +1669,58 @@ UA.configuration_check = {
       }
     },
 
-    sessionTimers: function(sessionTimers) {
-      if(sessionTimers === SIP.C.supported.REQUIRED) {
-        return SIP.C.supported.REQUIRED;
-      } else if (sessionTimers === SIP.C.supported.SUPPORTED) {
+    // user of Requre in the initial session timer request is not recommended and not implemented in SIP.js
+    sessionTimer: function(sessionTimer) {
+      if(sessionTimer === SIP.C.supported.SUPPORTED || sessionTimer === SIP.C.supported.REQUIRED) {
         return SIP.C.supported.SUPPORTED;
       } else  {
         return SIP.C.supported.UNSUPPORTED;
       }
     },
 
-    sessionTimerUACRefresher: function(refresher) {
-      if (refresher === C.REFRESHER_UAC) {
+    // If true, both UAC and UAS will make the initial session timer request.
+    sessionTimerInitialRequest: function(sessionTimerInitialRequest) {
+      if (sessionTimerInitialRequest === true) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+
+    sessionTimerInterval: function(sessionTimerInterval) {
+      if(SIP.Utils.isDecimal(sessionTimerInterval)) {
+        return Math.max(C.SESSION_EXPIRES_MIN, sessionTimerInterval)
+      } else {
+        return C.SESSION_EXPIRES_DEFAULT;
+      }
+    },
+
+    sessionTimerMinSe: function(sessionTimerMinSe) {
+      if(SIP.Utils.isDecimal(sessionTimerMinSe)) {
+        return Math.max(C.SESSION_EXPIRES_MIN, sessionTimerMinSe)
+      } else {
+        return C.SESSION_EXPIRES_MIN;
+      }
+    },
+
+    // https://tools.ietf.org/html/rfc4028#section-7.1
+    sessionTimerUacRefresherChoice : function(sessionTimerUacRefresherChoice) {
+      if (sessionTimerUacRefresherChoice === C.REFRESHER_UAC) {
         return C.REFRESHER_UAC;
-      } else if (refresher === C.REFRESHER_UAS) {
+      } else if (sessionTimerUacRefresherChoice === C.REFRESHER_UAS) {
         return C.REFRESHER_UAS;
       } else {
         return C.REFRESHER_OMIT;
       }
     },
 
-    sessionTimerUASRefresher: function(refresher) {
-      if (refresher === C.REFRESHER_UAC) {
+    // https://tools.ietf.org/html/rfc4028#section-9
+    // The UAS MUST set the value of the refresher parameter in the Session-Expires header field in the 2xx response
+    sessionTimerUasRefresherChoice: function(sessionTimerUasRefresherChoice) {
+      if (sessionTimerUasRefresherChoice === C.REFRESHER_UAC) {
         return C.REFRESHER_UAC;
-      } else if (refresher === C.REFRESHER_UAS) {
-        return C.REFRESHER_UAS;
       } else {
-        return C.REFRESHER_OMIT;
+        return C.REFRESHER_UAS;
       }
     }
   }
