@@ -28,8 +28,7 @@ function getSupportedHeader (request) {
   if (request.ua.configuration.replaces === SIP.C.supported.SUPPORTED) {
     optionTags.push('replaces');
   }
-  if (request.ua.configuration.sessionTimers === SIP.C.supported.SUPPORTED ||
-      request.ua.configuration.sessionTimers === SIP.C.supported.REQUIRED) {
+  if (request.ua.configuration.sessionTimers === SIP.C.supported.SUPPORTED) {
     optionTags.push('timer');
   }
 
@@ -548,6 +547,10 @@ IncomingRequest.prototype.reply_sl = function(code, reason) {
   this.transport.send(response);
 };
 
+IncomingRequest.prototype.isSessionTimerSupported = function() {
+  var options = this.parseHeader('Supported') || [];
+  return options.indexOf('timer') >= 0;
+};
 
 /**
  * @augments IncomingMessage

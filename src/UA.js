@@ -1153,6 +1153,10 @@ UA.prototype.loadConfig = function(configuration) {
   return;
 };
 
+UA.prototype.isSessionTimerSupported = function() {
+  return this.configuration.sessionTimer === SIP.C.supported.SUPPORTED;
+}
+
 /**
  * Configuration Object skeleton.
  * @private
